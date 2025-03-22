@@ -17,7 +17,7 @@ workflows:
           cd ../..
       - name: Flutter build ipa
         script: |
-          flutter build ipa --release --export-options-plist=example/ios/ExportOptions.plist
+          flutter build ipa --release --export-options-plist=example/ios/ExportOptions.plist --project=example/ios/Runner.xcodeproj
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
