@@ -9,7 +9,6 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          cd example
           flutter pub get
       - name: Install pods
         script: |
@@ -18,10 +17,9 @@ workflows:
           cd ../..
       - name: Flutter build ipa
         script: |
-          cd example
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          flutter build ipa --release --export-options-plist=example/ios/ExportOptions.plist
     artifacts:
-      - example/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
