@@ -27,7 +27,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - taido.88241020248@st.ueh.edu.vn
         notify:
           success: true
           failure: true
