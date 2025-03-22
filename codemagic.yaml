@@ -23,32 +23,29 @@ workflows:
           cd ..
       - name: Build ipa for TrollStore
         script: |
-          # Show current directory
-          echo "Starting build in directory: $(pwd)"
-          
-          # Build iOS app
+          # Build iOS app without codesign
           flutter build ios --release --no-codesign
           
-          # Show build output
-          echo "Checking build output:"
-          ls -la build/ios/iphoneos/
+          # Create IPA structure
+          cd build/ios/iphoneos
+          rm -rf Payload *.ipa
+          mkdir -p Payload
+          
+          # Copy and rename app for TrollStore
+          cp -R Runner.app "Payload/example.app"
+          
+          # Remove signing
+          rm -rf "Payload/example.app/_CodeSignature"
+          rm -f "Payload/example.app/embedded.mobileprovision"
           
           # Create IPA
-          cd build/ios/iphoneos
-          mkdir Payload
-          cp -r Runner.app Payload/
-          zip -r app.ipa Payload
+          zip -r example.ipa Payload
           
-          # Debug output
-          echo "IPA creation completed in: $(pwd)"
-          ls -la
-          
-          # Copy IPA to artifacts directory
-          mkdir -p $CM_BUILD_DIR/artifacts
-          cp app.ipa $CM_BUILD_DIR/artifacts/
-          echo "Copied IPA to artifacts directory"
+          # Move to artifacts
+          mkdir -p "$CM_BUILD_DIR/artifacts"
+          cp example.ipa "$CM_BUILD_DIR/artifacts/"
     artifacts:
-      - $CM_BUILD_DIR/artifacts/app.ipa
+      - $CM_BUILD_DIR/artifacts/example.ipa
     publishing:
       email:
         recipients:
