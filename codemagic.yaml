@@ -1,31 +1,38 @@
 workflows:
   ios-workflow:
     name: iOS Workflow
+    instance_type: mac_mini_m1
+    working_directory: example
     max_build_duration: 60
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.example.mrtdeg
     scripts:
+      - name: Set up project
+        script: |
+          echo "Current working directory: $(pwd)"
+          echo "List files in current directory:"
+          ls -la
+          echo "Setting up Flutter..."
+          flutter doctor -v
       - name: Get Flutter packages
         script: |
+          flutter clean
           flutter pub get
       - name: Install pods
         script: |
-          cd example/ios
+          cd ios
           pod install
-          cd ../..
-      - name: Check iOS project
+          cd ..
+      - name: Build ipa
         script: |
-          ls -la example/ios/
-          ls -la example/ios/Runner.xcodeproj/
-      - name: Flutter build ipa
-        script: |
-          flutter build ipa --release --export-options-plist=example/ios/ExportOptions.plist --verbose
+          flutter build ipa --debug
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log
     publishing:
       email:
         recipients:
