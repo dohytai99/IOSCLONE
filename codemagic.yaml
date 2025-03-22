@@ -42,8 +42,6 @@ workflows:
         notify:
           success: true
           failure: true
-        attachments:
-          - build/ios/iphoneos/app.ipa
       scripts:
         - name: Save build info
           script: |
