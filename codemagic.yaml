@@ -9,8 +9,8 @@ workflows:
       xcode: latest
       cocoapods: default
       ios_signing:
-        distribution_type: development
-        bundle_identifier: com.example.mrtdeg
+        distribution_type: ad-hoc
+        bundle_identifier: com.dohytai99.iosclone
     scripts:
       - name: Set up project
         script: |
@@ -19,6 +19,11 @@ workflows:
           ls -la
           echo "Setting up Flutter..."
           flutter doctor -v
+      - name: Update bundle ID
+        script: |
+          cd ios
+          /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dohytai99.iosclone" Runner/Info.plist
+          cd ..
       - name: Get Flutter packages
         script: |
           flutter clean
@@ -30,9 +35,10 @@ workflows:
           cd ..
       - name: Build ipa
         script: |
-          flutter build ipa --debug
+          flutter build ipa --release
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/xcarchive/*.xcarchive
     publishing:
       email:
         recipients:
@@ -40,6 +46,13 @@ workflows:
         notify:
           success: true
           failure: true
+        attachments:
+          - build/ios/ipa/*.ipa
+      scripts:
+        - name: Save build info
+          script: |
+            echo "Build completed at $(date)"
+            echo "IPA file location: build/ios/ipa/"
       slack:
         channel: '#builds'
         notify_on_build_start: true
