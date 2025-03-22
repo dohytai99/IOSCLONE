@@ -23,8 +23,15 @@ workflows:
           cd ..
       - name: Build ipa for TrollStore
         script: |
+          # Show current directory
+          echo "Starting build in directory: $(pwd)"
+          
           # Build iOS app
           flutter build ios --release --no-codesign
+          
+          # Show build output
+          echo "Checking build output:"
+          ls -la build/ios/iphoneos/
           
           # Create IPA
           cd build/ios/iphoneos
@@ -33,10 +40,15 @@ workflows:
           zip -r app.ipa Payload
           
           # Debug output
-          echo "Current directory: $(pwd)"
+          echo "IPA creation completed in: $(pwd)"
           ls -la
+          
+          # Copy IPA to artifacts directory
+          mkdir -p $CM_BUILD_DIR/artifacts
+          cp app.ipa $CM_BUILD_DIR/artifacts/
+          echo "Copied IPA to artifacts directory"
     artifacts:
-      - build/ios/iphoneos/app.ipa
+      - $CM_BUILD_DIR/artifacts/app.ipa
     publishing:
       email:
         recipients:
