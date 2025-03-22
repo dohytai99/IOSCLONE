@@ -8,9 +8,6 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: ad-hoc
-        bundle_identifier: com.dohytai99.iosclone
     scripts:
       - name: Set up project
         script: |
@@ -19,11 +16,6 @@ workflows:
           ls -la
           echo "Setting up Flutter..."
           flutter doctor -v
-      - name: Update bundle ID
-        script: |
-          cd ios
-          /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.dohytai99.iosclone" Runner/Info.plist
-          cd ..
       - name: Get Flutter packages
         script: |
           flutter clean
@@ -33,12 +25,16 @@ workflows:
           cd ios
           pod install
           cd ..
-      - name: Build ipa
+      - name: Build ipa for TrollStore
         script: |
-          flutter build ipa --release
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r app.ipa Payload
+          cd ../../..
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/ios/xcarchive/*.xcarchive
+      - build/ios/iphoneos/app.ipa
     publishing:
       email:
         recipients:
@@ -47,12 +43,12 @@ workflows:
           success: true
           failure: true
         attachments:
-          - build/ios/ipa/*.ipa
+          - build/ios/iphoneos/app.ipa
       scripts:
         - name: Save build info
           script: |
             echo "Build completed at $(date)"
-            echo "IPA file location: build/ios/ipa/"
+            echo "IPA file location: build/ios/iphoneos/app.ipa"
       slack:
         channel: '#builds'
         notify_on_build_start: true
