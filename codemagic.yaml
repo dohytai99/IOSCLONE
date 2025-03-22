@@ -11,10 +11,6 @@ workflows:
     scripts:
       - name: Set up project
         script: |
-          echo "Current working directory: $(pwd)"
-          echo "List files in current directory:"
-          ls -la
-          echo "Setting up Flutter..."
           flutter doctor -v
       - name: Get Flutter packages
         script: |
@@ -30,31 +26,16 @@ workflows:
           # Build iOS app
           flutter build ios --release --no-codesign
           
-          # Debug: Check if build succeeded
-          echo "Checking build directory..."
-          ls -la build/ios/iphoneos/
-          
-          # Create Payload directory and IPA in multiple locations for safety
-          mkdir -p build/ios/iphoneos/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
-          
-          # Create IPA in build/ios/iphoneos
+          # Create IPA
           cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
           zip -r app.ipa Payload
-          cd ../../..
           
-          # Also create IPA in build/outputs/ios
-          mkdir -p build/outputs/ios
-          cp build/ios/iphoneos/app.ipa build/outputs/ios/
-          
-          # Debug: List all locations
-          echo "Contents of build/ios/iphoneos:"
-          ls -la build/ios/iphoneos/
-          echo "Contents of build/outputs/ios:"
-          ls -la build/outputs/ios/
+          # Debug output
+          echo "Current directory: $(pwd)"
+          ls -la
     artifacts:
-      - build/**/outputs/**/*.ipa
-      - build/ios/**/app.ipa
       - build/ios/iphoneos/app.ipa
     publishing:
       email:
@@ -71,7 +52,6 @@ workflows:
             pwd
             echo "Contents of build directories:"
             ls -la build/ios/iphoneos/
-            ls -la build/outputs/ios/
       slack:
         channel: '#builds'
         notify_on_build_start: true
