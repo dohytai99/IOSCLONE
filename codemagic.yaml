@@ -27,13 +27,34 @@ workflows:
           cd ..
       - name: Build ipa for TrollStore
         script: |
+          # Build iOS app
           flutter build ios --release --no-codesign
+          
+          # Debug: Check if build succeeded
+          echo "Checking build directory..."
+          ls -la build/ios/iphoneos/
+          
+          # Create Payload directory and IPA in multiple locations for safety
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
+          
+          # Create IPA in build/ios/iphoneos
           cd build/ios/iphoneos
-          mkdir Payload
-          cp -r Runner.app Payload/
           zip -r app.ipa Payload
           cd ../../..
+          
+          # Also create IPA in build/outputs/ios
+          mkdir -p build/outputs/ios
+          cp build/ios/iphoneos/app.ipa build/outputs/ios/
+          
+          # Debug: List all locations
+          echo "Contents of build/ios/iphoneos:"
+          ls -la build/ios/iphoneos/
+          echo "Contents of build/outputs/ios:"
+          ls -la build/outputs/ios/
     artifacts:
+      - build/**/outputs/**/*.ipa
+      - build/ios/**/app.ipa
       - build/ios/iphoneos/app.ipa
     publishing:
       email:
@@ -46,7 +67,11 @@ workflows:
         - name: Save build info
           script: |
             echo "Build completed at $(date)"
-            echo "IPA file location: build/ios/iphoneos/app.ipa"
+            echo "Current directory:"
+            pwd
+            echo "Contents of build directories:"
+            ls -la build/ios/iphoneos/
+            ls -la build/outputs/ios/
       slack:
         channel: '#builds'
         notify_on_build_start: true
